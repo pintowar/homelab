@@ -77,6 +77,26 @@ services:
     ports:
       - '8989:8989'
 
+  # plex:
+  #   image: plexinc/pms-docker:latest
+  #   shm_size: '2gb'
+  #   restart: unless-stopped
+  #   environment:
+  #     - TZ=America/Fortaleza
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - VERSION=docker
+  #     - VA_DRIVER=IHD
+  #   volumes:
+  #     - ${VOLUMES_BASEDIR}/plex/config:/config
+  #     - ${VOLUMES_BASEDIR}/plex/data:/data
+  #     - ${VOLUMES_BASEDIR}/plex/transcode:/transcode
+  #     - ${VOLUMES_ASSETS}/Videos:/media
+  #   devices:
+  #     - /dev/dri:/dev/dri
+  #     - /dev/bus/usb:/dev/bus/usb
+  #   network_mode: host
+
   jellyfin:
     image: linuxserver/jellyfin:latest
     environment:
