@@ -79,6 +79,7 @@ services:
 
   jellyfin:
     image: linuxserver/jellyfin:latest
+    restart: unless-stopped
     environment:
       - TZ=America/Fortaleza
       - PUID=1000
