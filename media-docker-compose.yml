@@ -1,0 +1,89 @@
+version: '3'
+
+name: 'media'
+
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Fortaleza
+      - WEBUI_PORT=8080
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+    ports:
+      - '8080:8080'
+      - '62609:62609'
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Fortaleza
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_BASEDIR}/prowlarr/config:/config
+    ports:
+      - '9696:9696'
+
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Fortaleza
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_ASSETS}/Videos/radarr/movies:/movies
+      - ${VOLUMES_ASSETS}/Videos/sonarr:/tv
+      - ${VOLUMES_BASEDIR}/bazarr/appdata/config:/config
+    ports:
+      - '6767:6767'
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Fortaleza
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_BASEDIR}/radarr/appdata/config:/config
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+      - ${VOLUMES_ASSETS}/Videos/radarr/movies:/movies
+      - ${VOLUMES_ASSETS}/Videos/radarr/anime:/anime
+    ports:
+      - '7878:7878'
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Fortaleza
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_BASEDIR}/sonarr/appdata/config:/config
+      - ${VOLUMES_ASSETS}/Videos/sonarr/tv:/tv
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+    ports:
+      - '8989:8989'
+
+  jellyfin:
+    image: linuxserver/jellyfin:latest
+    environment:
+      - TZ=America/Fortaleza
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${VOLUMES_BASEDIR}/jellyfin/config:/config
+      - ${VOLUMES_ASSETS}/Videos:/data
+    network_mode: host
