@@ -20,7 +20,7 @@ services:
     environment:
       - DNSMASQ_USER=pihole
       - WEBPASSWORD=${PIHOLE_PASSWD}
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PIHOLE_DNS_=127.0.0.1#5054
       - WEB_PORT=8053
     volumes:

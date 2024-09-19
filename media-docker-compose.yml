@@ -5,7 +5,7 @@ services:
     image: linuxserver/qbittorrent:latest
     restart: unless-stopped
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - WEBUI_PORT=8080
       - PUID=1000
       - PGID=1000
@@ -20,7 +20,7 @@ services:
     image: ghcr.io/hotio/prowlarr:latest
     restart: unless-stopped
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PUID=1000
       - PGID=1000
     volumes:
@@ -32,7 +32,7 @@ services:
     image: ghcr.io/linuxserver/bazarr:latest
     restart: unless-stopped
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PUID=1000
       - PGID=1000
     volumes:
@@ -48,7 +48,7 @@ services:
     depends_on:
       - qbittorrent
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PUID=1000
       - PGID=1000
     volumes:
@@ -65,7 +65,7 @@ services:
     depends_on:
       - qbittorrent
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PUID=1000
       - PGID=1000
     volumes:
@@ -79,7 +79,7 @@ services:
     image: linuxserver/jellyfin:latest
     restart: unless-stopped
     environment:
-      - TZ=America/Fortaleza
+      - TZ=${TIMEZONE}
       - PUID=1000
       - PGID=1000
     volumes:
