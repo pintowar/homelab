@@ -24,6 +24,18 @@ services:
       - ${VOLUMES_BASEDIR}/homepage:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
 
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/homarr/configs:/app/data/configs
+      - ${VOLUMES_BASEDIR}/homarr/icons:/app/public/icons
+      - ${VOLUMES_BASEDIR}/homarr/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Optional, only if you want docker integration
+    ports:
+      - '7575:7575'
+
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
