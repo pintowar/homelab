@@ -3,6 +3,7 @@ name: 'utils'
 services:
   portainer:
     image: portainer/portainer-ce:latest
+    container_name: portainer
     restart: unless-stopped
     volumes:
       - ${VOLUMES_BASEDIR}/portainer:/data
@@ -12,6 +13,7 @@ services:
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
     restart: unless-stopped
     environment:
       PUID: 1000 # optional, your user id
@@ -24,23 +26,10 @@ services:
 
   watchtower:
     image: containrrr/watchtower:latest
+    container_name: watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     cap_add:
       - NET_RAW
       - SETUID
-
-  zerotier:
-    image: zerotier/zerotier:latest
-    restart: unless-stopped
-    volumes:
-      - ${VOLUMES_BASEDIR}/zerotier:/var/lib/zerotier-one
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
-    network_mode: host
-

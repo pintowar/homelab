@@ -3,6 +3,7 @@ name: 'net'
 services:
   cloudflared:
     image: visibilityspots/cloudflared:latest
+    container_name: cloudflared
     restart: unless-stopped
     environment:
       - UPSTREAM1=https://1.1.1.1/dns-query
@@ -14,7 +15,10 @@ services:
 
   pihole:
     image: pihole/pihole:latest
+    container_name: pihole
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     depends_on:
       - cloudflared
     environment:

@@ -3,6 +3,7 @@ name: 'media'
 services:
   qbittorrent:
     image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE}
@@ -18,6 +19,7 @@ services:
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
+    container_name: prowlarr
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE}
@@ -30,6 +32,7 @@ services:
 
   bazarr:
     image: ghcr.io/linuxserver/bazarr:latest
+    container_name: bazarr
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE}
@@ -44,6 +47,7 @@ services:
 
   radarr:
     image: ghcr.io/linuxserver/radarr:latest
+    container_name: radarr
     restart: unless-stopped
     depends_on:
       - qbittorrent
@@ -61,6 +65,7 @@ services:
 
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
+    container_name: sonarr
     restart: unless-stopped
     depends_on:
       - qbittorrent
@@ -77,6 +82,7 @@ services:
 
   jellyfin:
     image: linuxserver/jellyfin:latest
+    container_name: jellyfin
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE}
