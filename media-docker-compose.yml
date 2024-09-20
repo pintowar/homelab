@@ -14,8 +14,10 @@ services:
       - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
     ports:
-      - '8080:8080'
-      - '62609:62609'
+      - 8080:8080
+      - 62609:62609
+    networks:
+      - proxy_proxy-net
   
   deluge:
     image: lscr.io/linuxserver/deluge:latest
@@ -34,6 +36,8 @@ services:
       - 6881:6881
       - 6881:6881/udp
       - 58846:58846 #optional
+    networks:
+      - proxy_proxy-net
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
