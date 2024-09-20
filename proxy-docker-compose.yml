@@ -13,3 +13,9 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/nginx-manager/data:/data
       - ${VOLUMES_BASEDIR}/letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    driver: bridge

@@ -14,8 +14,30 @@ services:
       - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
     ports:
-      - '8080:8080'
-      - '62609:62609'
+      - 8080:8080
+      - 62609:62609
+    networks:
+      - proxy_proxy-net
+  
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TIMEZONE}
+      # - DELUGE_LOGLEVEL=error #optional
+    volumes:
+      - ${VOLUMES_BASEDIR}/deluge/config:/config
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+    ports:
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
+      - 58846:58846 #optional
+    networks:
+      - proxy_proxy-net
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
@@ -27,8 +49,8 @@ services:
       - PGID=1000
     volumes:
       - ${VOLUMES_BASEDIR}/prowlarr/config:/config
-    ports:
-      - '9696:9696'
+    networks:
+      - proxy_proxy-net
 
   bazarr:
     image: ghcr.io/linuxserver/bazarr:latest
@@ -42,8 +64,8 @@ services:
       - ${VOLUMES_ASSETS}/Videos/radarr/movies:/movies
       - ${VOLUMES_ASSETS}/Videos/sonarr:/tv
       - ${VOLUMES_BASEDIR}/bazarr/appdata/config:/config
-    ports:
-      - '6767:6767'
+    networks:
+      - proxy_proxy-net
 
   radarr:
     image: ghcr.io/linuxserver/radarr:latest
@@ -60,8 +82,8 @@ services:
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
       - ${VOLUMES_ASSETS}/Videos/radarr/movies:/movies
       - ${VOLUMES_ASSETS}/Videos/radarr/anime:/anime
-    ports:
-      - '7878:7878'
+    networks:
+      - proxy_proxy-net
 
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
@@ -77,8 +99,8 @@ services:
       - ${VOLUMES_BASEDIR}/sonarr/appdata/config:/config
       - ${VOLUMES_ASSETS}/Videos/sonarr/tv:/tv
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
-    ports:
-      - '8989:8989'
+    networks:
+      - proxy_proxy-net
 
   jellyfin:
     image: linuxserver/jellyfin:latest
@@ -91,4 +113,9 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/jellyfin/config:/config
       - ${VOLUMES_ASSETS}/Videos:/data
-    network_mode: host
+    networks:
+      - proxy_proxy-net
+
+networks:
+  proxy_proxy-net:
+    external: true

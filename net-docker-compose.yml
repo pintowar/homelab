@@ -11,7 +11,8 @@ services:
       - PORT=5054
       - ADDRESS=0.0.0.0
       - METRICS=127.0.0.1:8088
-    network_mode: host
+    networks:
+      - proxy_proxy-net
 
   pihole:
     image: pihole/pihole:latest
@@ -30,7 +31,13 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/dnsmasq.d:/etc/dnsmasq.d
       - ${VOLUMES_BASEDIR}/pihole:/etc/pihole
-    network_mode: host
+    networks:
+      - proxy_proxy-net
     cap_add:
       - NET_RAW
 
+networks:
+  proxy_proxy-net:
+    external: true
+  cloudflared-net:
+    driver: bridge
