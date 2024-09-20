@@ -37,8 +37,10 @@ services:
       - ${VOLUMES_BASEDIR}/homarr/icons:/app/public/icons
       - ${VOLUMES_BASEDIR}/homarr/data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro # Optional, only if you want docker integration
-    ports:
-      - '7575:7575'
+    # ports:
+    #   - '7575:7575'
+    networks:
+      - proxy_proxy-net
 
   watchtower:
     image: containrrr/watchtower:latest
