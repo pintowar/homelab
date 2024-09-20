@@ -13,11 +13,9 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
-    # ports:
-      # - '8080:8080'
-      # - '62609:62609'
-    networks:
-      - proxy_proxy-net
+    ports:
+      - '8080:8080'
+      - '62609:62609'
   
   deluge:
     image: lscr.io/linuxserver/deluge:latest
