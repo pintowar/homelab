@@ -1,0 +1,46 @@
+name: 'emu'
+
+services:
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    restart: unless-stopped
+    user: 1000:1000
+    environment:
+      - DB_HOST=romm-db
+      - DB_NAME=romm # Should match MYSQL_DATABASE in mariadb
+      - DB_USER=romm-user # Should match MYSQL_USER in mariadb
+      - DB_PASSWD=${ROMM_DB_PASSWD} # Should match MYSQL_PASSWORD in mariadb
+      - ROMM_AUTH_SECRET_KEY=${ROMM_SECRET_KEY} # Generate a key with `openssl rand -hex 32`
+      - IGDB_CLIENT_ID=${IGDB_CLIENT_ID} # Generate an ID and SECRET in IGDB
+      - IGDB_CLIENT_SECRET=${IGDB_CLIENT_SECRET} # https://api-docs.igdb.com/#account-creation
+      - MOBYGAMES_API_KEY= # https://www.mobygames.com/info/api/
+      - STEAMGRIDDB_API_KEY= # https://github.com/rommapp/romm/wiki/Generate-API-Keys#steamgriddb
+    volumes:
+      - ${VOLUMES_BASEDIR}/romm/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
+      - ${VOLUMES_BASEDIR}/romm/redis:/redis-data # Cached data for background tasks
+      - ${VOLUMES_BASEDIR}/romm/config:/romm/config # Path where config.yml is stored
+      - ${VOLUMES_ASSETS}/Emu/library:/romm/library # Your game library
+      - ${VOLUMES_ASSETS}/Emu/assets:/romm/assets # Uploaded saves, states, etc.
+    depends_on:
+      - romm-db
+    networks:
+      - proxy_proxy-net
+
+  romm-db:
+    image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=${ROMM_ROOT_PASSWD} # Use a unique, secure password
+      - MARIADB_DATABASE=romm
+      - MARIADB_USER=romm-user
+      - MARIADB_PASSWORD=${ROMM_DB_PASSWD}
+    volumes:
+      - ${VOLUMES_BASEDIR}/romm/db:/var/lib/mysql
+    networks:
+      - proxy_proxy-net
+
+networks:
+  proxy_proxy-net:
+    external: true
