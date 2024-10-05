@@ -106,6 +106,8 @@ services:
     image: linuxserver/jellyfin:latest
     container_name: jellyfin
     restart: unless-stopped
+    group_add:
+      - "110"
     environment:
       - TZ=${TIMEZONE}
       - PUID=1000
@@ -113,8 +115,30 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/jellyfin/config:/config
       - ${VOLUMES_ASSETS}/Videos:/data
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
       - proxy_proxy-net
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    group_add:
+      - "110"
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      - ${VOLUMES_BASEDIR}/plex/config:/config
+      - ${VOLUMES_ASSETS}/Videos/radarr/movies:/media/movies
+      - ${VOLUMES_ASSETS}/Videos/radarr/anime:/media/anime
+      - ${VOLUMES_ASSETS}/Videos/sonarr/tv:/media/tv
+    devices:
+      - /dev/dri:/dev/dri
+    network_mode: host
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
