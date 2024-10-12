@@ -12,11 +12,12 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/open_webui:/app/backend/data
     networks:
-      - proxy_proxy-net    
+      - proxy_proxy-net
 
   langfuse-server:
     image: langfuse/langfuse:2
     container_name: langfuse-server
+    restart: unless-stopped
     depends_on:
       langfuse-db:
         condition: service_healthy
@@ -33,7 +34,7 @@ services:
   langfuse-db:
     image: postgres
     container_name: langfuse-db
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 3s
