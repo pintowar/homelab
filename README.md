@@ -7,8 +7,8 @@ Set of docker compose files for my personal homelab applications
 This repository contains a `.env.sample` files. Just copy (or rename it) to `.env` and add the following envs:
 
 1. General config
-    * PUID: docker user id;
-    * PGID: docker group id;
+    * PUID: docker user id (usually 1000);
+    * PGID: docker group id (usually 1000);
     * TIMEZONE: timezone to be used on some containers. (eg: America/New_York);
     * VOLUMES_BASEDIR: folder to store the applications tmp/config files;
     * VOLUMES_ASSETS: folder to store the applications assets (pictures, audios, videos, etc);
