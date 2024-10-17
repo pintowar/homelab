@@ -39,6 +39,50 @@ services:
       - NET_RAW
       - SETUID
 
+  glances:
+    image: nicolargo/glances:latest-full
+    container_name: glances
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=${TIMEZONE}
+      - GLANCES_OPT=-w
+    networks:
+      - proxy_proxy-net
+
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    restart: unless-stopped
+    pid: host
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /:/host/root:ro,rslave
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy_proxy-net
+
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+
 networks:
   proxy_proxy-net:
     external: true
