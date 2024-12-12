@@ -29,6 +29,22 @@ services:
     networks:
       - proxy_proxy-net
 
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    privileged: true
+    networks:
+      - proxy_proxy-net
+
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
