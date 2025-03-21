@@ -5,7 +5,7 @@ services:
     image: rommapp/romm:latest
     container_name: romm
     restart: unless-stopped
-    user: 1000:1000
+    user: ${PUID}:${PGID}
     environment:
       - DB_HOST=romm-db
       - DB_NAME=romm # Should match MYSQL_DATABASE in mariadb

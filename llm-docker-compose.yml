@@ -5,7 +5,7 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
     restart: unless-stopped
-    user: 1000:1000
+    user: ${PUID}:${PGID}
     environment:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
       - WEBUI_AUTH=False
