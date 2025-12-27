@@ -5,12 +5,35 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
     restart: unless-stopped
-    user: ${PUID}:${PGID}
     environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
       - WEBUI_AUTH=False
     volumes:
-      - ${VOLUMES_BASEDIR}/open_webui:/app/backend/data
+      - ${VOLUMES_BASEDIR}/open_webui/data:/app/backend/data
+      - ${VOLUMES_BASEDIR}/open_webui/cache:/root/.cache
+    networks:
+      - proxy_proxy-net
+
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:main
+    container_name: mcpo-server
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/mcps/config.json:/app/config.json
+    command: --config /app/config.json
+    networks:
+      - proxy_proxy-net
+
+  docling-serve:
+    image: quay.io/docling-project/docling-serve
+    container_name: docling-serve
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DOCLING_SERVE_ENABLE_UI=true
     networks:
       - proxy_proxy-net
 
@@ -46,6 +69,19 @@ services:
       - POSTGRES_DB=${LANGFUSE_DB_NAME}
     volumes:
       - ${VOLUMES_BASEDIR}/langfuse/db:/var/lib/postgresql/data
+    networks:
+      - proxy_proxy-net
+
+  perplexica:
+    image: itzcrazykns1337/perplexica:main
+    container_name: perplexica
+    restart: unless-stopped
+    environment:
+      - DATA_DIR=/home/perplexica
+    volumes:
+      - ${VOLUMES_BASEDIR}/perplexica/backend-dbstore:/home/perplexica/data
+      - ${VOLUMES_BASEDIR}/perplexica/uploads:/home/perplexica/uploads
+      - ${VOLUMES_BASEDIR}/perplexica/config.toml:/home/perplexica/config.toml
     networks:
       - proxy_proxy-net
 

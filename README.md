@@ -32,3 +32,6 @@ This repository contains a `.env.sample` files. Just copy (or rename it) to `.en
     * LANGFUSE_SALT: used to salt hashed API keys;
     * LANGFUSE_ENCRYPTION_KEY: used to encrypt sensitive data;
     * OLLAMA_BASE_URL: ollama base url for open-webui.
+
+5. For `utils-docker-compose.yml`:
+    * HOMEPAGE_ALLOWED_HOSTS: add homepage allowed source

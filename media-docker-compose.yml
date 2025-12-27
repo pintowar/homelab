@@ -18,7 +18,7 @@ services:
       - 62609:62609
     networks:
       - proxy_proxy-net
-  
+
   deluge:
     image: lscr.io/linuxserver/deluge:latest
     container_name: deluge
@@ -85,6 +85,23 @@ services:
     networks:
       - proxy_proxy-net
 
+  readarr:
+    image: ghcr.io/linuxserver/readarr:develop
+    container_name: readarr
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/readarr/appdata/config:/config
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+      - ${VOLUMES_ASSETS}/Books/readarr/books:/books
+    networks:
+      - proxy_proxy-net
+
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -133,6 +150,7 @@ services:
       - VERSION=docker
     volumes:
       - ${VOLUMES_BASEDIR}/plex/config:/config
+      - ${VOLUMES_BASEDIR}/plex/transcode:/transcode
       - ${VOLUMES_ASSETS}/Videos/radarr/movies:/media/movies
       - ${VOLUMES_ASSETS}/Videos/radarr/anime:/media/anime
       - ${VOLUMES_ASSETS}/Videos/sonarr/tv:/media/tv
@@ -160,6 +178,20 @@ services:
       - PGID=${PGID}
     volumes:
       - ${VOLUMES_BASEDIR}/jellyseerr/config:/app/config
+    networks:
+      - proxy_proxy-net
+
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/kavita/config:/config
+      - ${VOLUMES_ASSETS}/Books:/data
     networks:
       - proxy_proxy-net
 

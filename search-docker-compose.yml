@@ -1,0 +1,53 @@
+name: 'search'
+
+services:
+  searxng:
+    container_name: searxng
+    image: docker.io/searxng/searxng:latest
+    restart: unless-stopped
+    depends_on:
+      searxng-redis:
+        condition: service_healthy
+    volumes:
+      - ${VOLUMES_BASEDIR}/searxng/searxng:/etc/searxng
+    environment:
+      - SEARXNG_SECRET=${SEARXNG_SECRET:-secret}
+      - SEARXNG_BASE_URL=https://${SEARXNG_HOSTNAME:-localhost}/
+      - UWSGI_WORKERS=${SEARXNG_UWSGI_WORKERS:-4}
+      - UWSGI_THREADS=${SEARXNG_UWSGI_THREADS:-4}
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    networks:
+      - proxy_proxy-net
+
+  searxng-redis:
+    image: "redis:7"
+    container_name: searxng-redis
+    restart: unless-stopped
+    volumes:
+      - "${VOLUMES_BASEDIR}/searxng/redis:/data"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    networks:
+      - proxy_proxy-net
+
+  tor-proxy:
+    image: dperson/torproxy
+    container_name: tor-proxy
+    restart: unless-stopped
+    networks:
+      - proxy_proxy-net
+
+networks:
+  proxy_proxy-net:
+    external: true

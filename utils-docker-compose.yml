@@ -18,6 +18,7 @@ services:
     container_name: homepage
     restart: unless-stopped
     environment:
+      - HOMEPAGE_ALLOWED_HOSTS=${HOMEPAGE_ALLOWED_HOSTS}
       - TZ=${TIMEZONE}
       - PUID=${PUID} # optional, your user id
       - PGID=${PGID} # optional, your group id
@@ -45,15 +46,17 @@ services:
     networks:
       - proxy_proxy-net
 
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
+  tugtainer:
+    image: quenary/tugtainer:latest
+    container_name: tugtainer
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    cap_add:
-      - NET_RAW
-      - SETUID
+      - ${VOLUMES_BASEDIR}/tugtainer:/tugtainer 
+    environment:
+      - TZ=${TIMEZONE}
+    networks:
+      - proxy_proxy-net
 
   glances:
     image: nicolargo/glances:latest-full
