@@ -27,13 +27,14 @@ services:
       - proxy_proxy-net
 
   docling-serve:
-    image: quay.io/docling-project/docling-serve
+    image: quay.io/docling-project/docling-serve-cpu
     container_name: docling-serve
     restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - DOCLING_SERVE_ENABLE_UI=true
+      - DOCLING_SERVE_ENABLE_REMOTE_SERVICES=true
     networks:
       - proxy_proxy-net
 

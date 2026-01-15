@@ -35,3 +35,5 @@ This repository contains a `.env.sample` files. Just copy (or rename it) to `.en
 
 5. For `utils-docker-compose.yml`:
     * HOMEPAGE_ALLOWED_HOSTS: add homepage allowed source
+    * VAULTWARDEN_TOKEN: vaultwarden token
+    * VAULTWARDEN_DOMAIN: vaultwarden domain
