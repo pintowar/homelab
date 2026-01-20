@@ -1,16 +1,18 @@
 name: 'net'
 
 services:
-  cloudflared:
-    image: visibilityspots/cloudflared:latest
-    container_name: cloudflared
+  unbound:
+    image: mvance/unbound:latest
+    container_name: unbound
     restart: unless-stopped
-    environment:
-      - UPSTREAM1=https://1.1.1.1/dns-query
-      - UPSTREAM2=https://1.0.0.1/dns-query
-      - PORT=5054
-      - ADDRESS=0.0.0.0
-      - METRICS=127.0.0.1:8088
+    volumes:
+      - ${VOLUMES_BASEDIR}/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf
+    healthcheck:
+      # Uses drill to query localhost on port 53 for google.com
+      test: ["CMD-SHELL", "drill @127.0.0.1 -p 5335 google.com || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - proxy_proxy-net
 
@@ -18,16 +20,13 @@ services:
     image: pihole/pihole:latest
     container_name: pihole
     restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=false"
     depends_on:
-      - cloudflared
+      - unbound
     environment:
       - DNSMASQ_USER=pihole
       - WEBPASSWORD=${PIHOLE_PASSWD}
       - TZ=${TIMEZONE}
-      - PIHOLE_DNS_=cloudflared#5054
-      - WEB_PORT=8053
+      - PIHOLE_DNS_=unbound#5335
     volumes:
       - ${VOLUMES_BASEDIR}/pihole/dnsmasq.d:/etc/dnsmasq.d
       - ${VOLUMES_BASEDIR}/pihole/pihole:/etc/pihole
@@ -43,5 +42,3 @@ services:
 networks:
   proxy_proxy-net:
     external: true
-  cloudflared-net:
-    driver: bridge

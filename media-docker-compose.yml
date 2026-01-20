@@ -1,6 +1,24 @@
 name: 'media'
 
 services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PK} # <--- Paste key from Step 1
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES} # <--- Required for NordVPN
+      - SERVER_COUNTRIES=${TUN_COUNTRIES} # Optional: Pick your country
+      - TZ=${TIMEZONE}
+    networks:
+      - proxy_proxy-net
+
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -13,31 +31,10 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
-    ports:
-      - 8080:8080
-      - 62609:62609
-    networks:
-      - proxy_proxy-net
-
-  deluge:
-    image: lscr.io/linuxserver/deluge:latest
-    container_name: deluge
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TIMEZONE}
-      # - DELUGE_LOGLEVEL=error #optional
-    volumes:
-      - ${VOLUMES_BASEDIR}/deluge/config:/config
-      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
-    ports:
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
-      - 58846:58846 #optional
-    networks:
-      - proxy_proxy-net
+    # CRITICAL: Route network through Gluetun
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
@@ -49,8 +46,9 @@ services:
       - PGID=${PGID}
     volumes:
       - ${VOLUMES_BASEDIR}/prowlarr/config:/config
-    networks:
-      - proxy_proxy-net
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
 
   bazarr:
     image: ghcr.io/linuxserver/bazarr:latest
@@ -85,23 +83,6 @@ services:
     networks:
       - proxy_proxy-net
 
-  readarr:
-    image: ghcr.io/linuxserver/readarr:develop
-    container_name: readarr
-    restart: unless-stopped
-    depends_on:
-      - qbittorrent
-    environment:
-      - TZ=${TIMEZONE}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - ${VOLUMES_BASEDIR}/readarr/appdata/config:/config
-      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
-      - ${VOLUMES_ASSETS}/Books/readarr/books:/books
-    networks:
-      - proxy_proxy-net
-
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -124,7 +105,7 @@ services:
     container_name: jellyfin
     restart: unless-stopped
     group_add:
-      - "110"
+      - "993"
     environment:
       - TZ=${TIMEZONE}
       - PUID=${PUID}

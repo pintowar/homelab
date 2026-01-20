@@ -15,6 +15,9 @@ This repository contains a `.env.sample` files. Just copy (or rename it) to `.en
 
 2. For `net-docker-compose.yml`:
     * PIHOLE_PASSWD: password for pi hole service;
+    * WIREGUARD_PK: wireguard primary key
+    * WIREGUARD_ADDRESSES: wireguard ip address
+    * TUN_COUNTRIES: server countries
 
 3. For `emu-docker-compose.yml`:
     * ROMM_ROOT_PASSWD: root password for ROOM database;
