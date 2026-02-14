@@ -1,20 +1,33 @@
 name: 'proxy'
 
 services:
-  nginx-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-manager
+  meshnet:
+    image: ghcr.io/mattstechinfo/meshnet:latest
+    container_name: meshnet
+    hostname: meshnet
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    env_file: .env.vpn
     ports:
     # These ports are in format <host-port>:<container-port>
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
       - '81:81' # Admin Web Port
+    networks:
+      - proxy-net
+
+  nginx-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-manager
+    restart: unless-stopped
+    depends_on:
+      - meshnet
+    network_mode: "service:meshnet"
     volumes:
       - ${VOLUMES_BASEDIR}/nginx-manager/data:/data
       - ${VOLUMES_BASEDIR}/letsencrypt:/etc/letsencrypt
-    networks:
-      - proxy-net
 
 networks:
   proxy-net:
