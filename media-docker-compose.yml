@@ -4,7 +4,7 @@ services:
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
-    restart: unless-stopped
+    restart: always #unless-stopped
     cap_add:
       - NET_ADMIN
     devices:
@@ -16,8 +16,16 @@ services:
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES} # <--- Required for NordVPN
       - SERVER_COUNTRIES=${TUN_COUNTRIES} # Optional: Pick your country
       - TZ=${TIMEZONE}
+      - WIREGUARD_MTU=1360
+      - DNS_SERVER=on
     networks:
       - proxy_proxy-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9999 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   qbittorrent:
     image: linuxserver/qbittorrent:latest
@@ -34,7 +42,8 @@ services:
     # CRITICAL: Route network through Gluetun
     network_mode: "service:gluetun"
     depends_on:
-      - gluetun
+      gluetun:
+        condition: service_healthy
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
@@ -48,7 +57,21 @@ services:
       - ${VOLUMES_BASEDIR}/prowlarr/config:/config
     network_mode: "service:gluetun"
     depends_on:
-      - gluetun
+      gluetun:
+        condition: service_healthy
+
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PORT=8191
+      - LOG_LEVEL=info
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
 
   bazarr:
     image: ghcr.io/linuxserver/bazarr:latest
@@ -149,18 +172,23 @@ services:
     networks:
       - proxy_proxy-net
 
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE}
-      - PUID=${PUID}
-      - PGID=${PGID}
     volumes:
-      - ${VOLUMES_BASEDIR}/jellyseerr/config:/app/config
+      - ${VOLUMES_BASEDIR}/seerr/config:/app/config
     networks:
       - proxy_proxy-net
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
 
   kavita:
     image: lscr.io/linuxserver/kavita:latest
