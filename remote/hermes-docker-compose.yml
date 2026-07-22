@@ -1,0 +1,68 @@
+name: 'hermes'
+
+services: 
+  hermes-agent:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-agent
+    restart: unless-stopped
+    command: gateway run
+    # ports:
+    #   - "8642:8642" # Gateway API (restricted to localhost for security)
+    #   - "9119:9119" # Telemetry Dashboard TUI (restricted to localhost)
+    volumes:
+      - ${VOLUMES_BASEDIR}/hermes/home:/home/hermes/.hermes
+      - hermes-agent-src:/opt/hermes
+    environment:
+      # Maps files created inside the container to your local user UID/GID
+      - HERMES_UID=${PUID}
+      - HERMES_GID=${PGID}
+
+      - HERMES_HOME=/home/hermes/.hermes
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_TUI=1
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_PORT=9119
+
+      # --- REQUIRED SECURITY GATE CREDENTIALS ---
+      # Define a username and password to satisfy the 0.0.0.0 bind gate
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASHBOARD_USERNAME}
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASHBOARD_PASSWORD}
+
+      # Generates a stable session signing secret so you do not get logged out on restarts.
+      # Ideally, generate a unique key using `openssl rand -hex 32`
+      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASHBOARD_SECRET}
+      # ------------------------------------------      
+    networks:
+      - remote_default
+
+  hermes-webui:
+    image: ghcr.io/nesquena/hermes-webui:latest
+    container_name: hermes-webui
+    restart: unless-stopped
+    # ports:
+    #   - "8787:8787" # Gateway API (restricted to localhost for security)
+    volumes:
+      - ${VOLUMES_BASEDIR}/hermes/home:/home/hermeswebui/.hermes
+      - hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
+      - ${VOLUMES_BASEDIR}/hermes/workspace:/workspace # Mounts the local host directory for easy file access
+    environment:
+      - WANTED_UID=${PUID}
+      - WANTED_GID=${PGID}
+
+      - HERMES_WEBUI_HOST=0.0.0.0
+      - HERMES_WEBUI_PORT=8787
+      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+      
+      # If you expose the WebUI outside of localhost, uncomment and set a password:
+      # - HERMES_WEBUI_PASSWORD=change-me-to-a-strong-password
+    depends_on:
+      - hermes-agent
+    networks:
+      - remote_default
+
+volumes:
+  hermes-agent-src:
+
+networks:
+  remote_default:
+    external: true

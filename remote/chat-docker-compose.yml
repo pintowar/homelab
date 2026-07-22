@@ -1,0 +1,46 @@
+name: 'chat'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - WEBUI_AUTH=False
+    volumes:
+      - ${VOLUMES_BASEDIR}/open_webui/data:/app/backend/data
+      - ${VOLUMES_BASEDIR}/open_webui/cache:/root/.cache
+    networks:
+      - remote_default
+      
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:main
+    container_name: mcpo-server
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/mcps/config.json:/app/config.json
+      # - ${VOLUMES_BASEDIR}/mcps:/app
+    command: --config /app/config.json
+    networks:
+      - remote_default
+
+  # vane:
+  #   image: itzcrazykns1337/vane:latest
+  #   container_name: vane
+  #   restart: unless-stopped
+  #   environment:
+  #     - DATA_DIR=/home/vane
+  #   volumes:
+  #     - ${VOLUMES_BASEDIR}/vane/backend-dbstore:/home/vane/data
+  #     - ${VOLUMES_BASEDIR}/vane/uploads:/home/vane/uploads
+  #     - ${VOLUMES_BASEDIR}/vane/config.toml:/home/vane/config.toml
+  #   networks:
+  #     - remote_default
+
+networks:
+  remote_default:
+    external: true
+  searxng_internal:
+    internal: true

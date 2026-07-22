@@ -1,0 +1,44 @@
+name: 'remote'
+
+services:
+  caddy:
+    image: docker.io/library/caddy
+    container_name: caddy
+    restart: unless-stopped
+    # user: ${PUID}:${PGID}
+    ports:
+      - "80:80"
+    environment:
+      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+      - DOMAIN=${DUCKDNS_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - .env
+
+  hawser:
+    image: ghcr.io/finsys/hawser:latest
+    container_name: hawser
+    restart: unless-stopped
+    environment:
+      - AGENT_NAME=remote-podman-host
+      - LOG_LEVEL=debug
+      - TOKEN=${HAWSER_TOKEN}
+    volumes:
+      # Map your remote Podman socket to Docker's default socket location in the container.
+      # Notice the :Z suffix; this is crucial if SELinux is active (RHEL, Fedora, Rocky Linux).
+      - /run/user/${PUID}/podman/podman.sock:/var/run/docker.sock
+      # Optional: Bind-mount a path on the host where you want Compose stacks to be written
+      # - /opt/podman/stacks:/data/stacks
+    ports:
+      - 2376:2376
+    labels:
+      # This prevents Dockhand from attempting to auto-update the Hawser agent,
+      # which would drop the connection mid-operation and cause a hang.
+      - "dockhand.update=false"
+
+volumes:
+  caddy_data:
+  caddy_config:
