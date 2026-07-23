@@ -2,7 +2,7 @@ name: 'hermes'
 
 services: 
   hermes-agent:
-    image: docker.io/nousresearch/hermes-agent:latest
+    image: docker.io/nousresearch/hermes-agent:v2026.7.20
     container_name: hermes-agent
     restart: unless-stopped
     command: gateway run
@@ -36,7 +36,7 @@ services:
       - proxy_network
 
   hermes-webui:
-    image: ghcr.io/nesquena/hermes-webui:0.52.142
+    image: ghcr.io/nesquena/hermes-webui:latest
     container_name: hermes-webui
     restart: unless-stopped
     # ports:
