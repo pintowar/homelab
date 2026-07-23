@@ -1,0 +1,21 @@
+name: 'proxy'
+
+services:
+  caddy:
+    image: docker.io/library/caddy
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - .env
+
+volumes:
+  caddy_data:
+  caddy_config:

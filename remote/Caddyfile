@@ -1,0 +1,46 @@
+# 1. Performance and Security Configurations
+(common_settings) {
+    # Performance: Enable Zstandard (modern, fast) and Gzip (fallback) compression
+    encode zstd gzip
+
+    # Security: Standard headers to protect your upstream applications
+    header {
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Control how much referrer information is sent
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Disable FLoC tracking
+        Permissions-Policy interest-cohort=()
+        
+        # Optional: Hide Caddy's server signature header
+        -Server
+    }
+}
+
+# 2. Parameterized Proxy Snippet
+(proxy_to) {
+    import common_settings
+    reverse_proxy {args[0]}
+}
+
+# =====================================================================
+# Site Blocks
+# =====================================================================
+
+http://hermes.{$DOMAIN} {
+    import proxy_to hermes-webui:8787
+}
+
+http://hermes-dashboard.{$DOMAIN} {   
+    import proxy_to hermes-agent:9119
+}
+
+http://searxng.{$DOMAIN} {   
+    import proxy_to searxng:8080
+}
+
+http://open-webui.{$DOMAIN} {   
+    import proxy_to open-webui:8080
+}
