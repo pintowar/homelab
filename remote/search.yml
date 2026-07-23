@@ -18,7 +18,7 @@ services:
       - UWSGI_WORKERS=${SEARXNG_UWSGI_WORKERS:-2}
       - UWSGI_THREADS=${SEARXNG_UWSGI_THREADS:-2}
     networks:
-      - remote_default
+      - proxy_network
       - searxng_internal
     cap_drop:
       - ALL
@@ -62,7 +62,7 @@ volumes:
   searxng-redis-data:
 
 networks:
-  remote_default:
+  proxy_network:
     external: true
   searxng_internal:
     internal: true

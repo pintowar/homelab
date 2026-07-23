@@ -33,7 +33,7 @@ services:
       - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASHBOARD_SECRET}
       # ------------------------------------------      
     networks:
-      - remote_default
+      - proxy_network
 
   hermes-webui:
     image: ghcr.io/nesquena/hermes-webui:latest
@@ -58,11 +58,11 @@ services:
     depends_on:
       - hermes-agent
     networks:
-      - remote_default
+      - proxy_network
 
 volumes:
   hermes-agent-src:
 
 networks:
-  remote_default:
+  proxy_network:
     external: true

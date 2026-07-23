@@ -13,7 +13,7 @@ services:
       - ${VOLUMES_BASEDIR}/open_webui/data:/app/backend/data
       - ${VOLUMES_BASEDIR}/open_webui/cache:/root/.cache
     networks:
-      - remote_default
+      - proxy_network
       
   mcpo:
     image: ghcr.io/open-webui/mcpo:main
@@ -24,7 +24,7 @@ services:
       # - ${VOLUMES_BASEDIR}/mcps:/app
     command: --config /app/config.json
     networks:
-      - remote_default
+      - proxy_network
 
   # vane:
   #   image: itzcrazykns1337/vane:latest
@@ -37,10 +37,10 @@ services:
   #     - ${VOLUMES_BASEDIR}/vane/uploads:/home/vane/uploads
   #     - ${VOLUMES_BASEDIR}/vane/config.toml:/home/vane/config.toml
   #   networks:
-  #     - remote_default
+  #     - proxy_network
 
 networks:
-  remote_default:
+  proxy_network:
     external: true
   searxng_internal:
     internal: true
