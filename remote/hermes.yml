@@ -53,6 +53,7 @@ services:
       - HERMES_WEBUI_PORT=8787
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
       
+      - HERMES_WEBUI_SKIP_AGENT_INSTALL=1
       # If you expose the WebUI outside of localhost, uncomment and set a password:
       # - HERMES_WEBUI_PASSWORD=change-me-to-a-strong-password
     depends_on:
