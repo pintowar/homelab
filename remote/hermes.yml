@@ -36,7 +36,7 @@ services:
       - proxy_network
 
   hermes-webui:
-    image: ghcr.io/nesquena/hermes-webui:latest
+    image: ghcr.io/nesquena/hermes-webui:0.52.142
     container_name: hermes-webui
     restart: unless-stopped
     # ports:
@@ -53,7 +53,7 @@ services:
       - HERMES_WEBUI_PORT=8787
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
       
-      - HERMES_WEBUI_SKIP_AGENT_INSTALL=1
+      # - HERMES_WEBUI_SKIP_AGENT_INSTALL=1
       # If you expose the WebUI outside of localhost, uncomment and set a password:
       # - HERMES_WEBUI_PASSWORD=change-me-to-a-strong-password
     depends_on:
