@@ -19,3 +19,7 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+
+networks:
+  network:
+    driver: bridge
