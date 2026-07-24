@@ -45,12 +45,8 @@ http://open-webui.{$DOMAIN} {
     import proxy_to open-webui:8080
 }
 
-http://webclaw.{$DOMAIN} {
-    import webclaw:3080
-}
-
-http://camofox.{$DOMAIN} {
-    import camofox-browser:9377
+http://firecrawl.{$DOMAIN} {
+    import firecrawl-api:3002
 }
 
 http://n8n.{$DOMAIN} {

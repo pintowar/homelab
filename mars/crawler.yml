@@ -1,46 +1,112 @@
 name: 'crawler'
 
 services:
-  webclaw:
-    image: ghcr.io/0xmassi/webclaw:latest
-    container_name: webclaw-server
-    command: webclaw-server
-    environment:
-      # Secures your local /v1/* endpoints. 
-      - WEBCLAW_API_KEY=${WEBCLAW_API_KEY}
-      # Optional: Explicitly define host and port
-      - WEBCLAW_PORT=3000
-      - WEBCLAW_HOST=0.0.0.0
-    networks:
-      - proxy_network
-
-  camofox-browser:
-    build:
-      context: https://github.com/redf0x1/camofox-browser.git#main
-    container_name: camofox-browser
+  # ── 1. Firecrawl Core API Server & Subprocesses ────────────────────
+  firecrawl-api:
+    image: ghcr.io/firecrawl/firecrawl:latest
+    container_name: firecrawl-api
     restart: unless-stopped
     environment:
-      - CAMOFOX_HOST=0.0.0.0
-      - CAMOFOX_PORT=9377
-      - CAMOFOX_AUTH_MODE=auto  # Options: auto, none, token. "auto" enforces CAMOFOX_API_KEY for external hosts.
-      - CAMOFOX_API_KEY=${CAMOFOX_API_KEY}
-      # - CAMOFOX_ADMIN_KEY=your_admin_key_here  # Optional
-      # - ENABLE_VNC=true                         # Enables the visual noVNC interface on port 6080
-      
-      # Optional: Route traffic through a residential proxy for better stealth
-      # - PROXY_HOST=your.proxy.com
-      # - PROXY_PORT=12345
-      # - PROXY_USER=username
-      # - PROXY_PASSWORD=password
-    volumes:
-      - camofox-data:/home/node/.camofox
-    shm_size: '2gb' # Recommended for heavy browser actions to prevent crashes
+      - HOST=0.0.0.0
+      - PORT=3002
+      - ENV=local
+      - USE_DB_AUTHENTICATION=${USE_DB_AUTHENTICATION:-false}
+      - BULL_AUTH_KEY=${BULL_AUTH_KEY:-localdev}
+      # Redis Connection (Job queuing & rate limiting)
+      - REDIS_URL=redis://redis:6379
+      - REDIS_RATE_LIMIT_URL=redis://redis:6379
+      # NuQ Queue Connections
+      - NUQ_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - NUQ_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@nuq-postgres:5432/${POSTGRES_DB:-postgres}
+      # Headless Rendering Microservice Connection
+      - PLAYWRIGHT_MICROSERVICE_URL=http://playwright-service:3000/scrape
+      - BROWSER_SERVICE_URL=http://playwright-service:3000
+      # AI features (Optional)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-}
+      - MODEL_NAME=${MODEL_NAME:-}
+    depends_on:
+      redis:
+        condition: service_started
+      playwright-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy # Wait for RabbitMQ to be ready to avoid connection timeouts
+      nuq-postgres:
+        condition: service_started
     networks:
       - proxy_network
+      - firecrawl_internal
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    command: ["node", "dist/src/harness.js", "--start-docker"]
+
+  # ── 2. Playwright Headless Browser Microservice ────────────────────────
+  playwright-service:
+    image: ghcr.io/firecrawl/playwright-service:latest
+    container_name: firecrawl-playwright
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - MAX_CONCURRENT_PAGES=10
+    networks:
+      - firecrawl_internal
+    # Playwright containers require healthy shared memory sizing to prevent Chrome crashes
+    shm_size: "1gb"
+
+  # ── 3. Task Orchestration Broker (RabbitMQ) ───────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: firecrawl-rabbitmq
+    restart: unless-stopped
+    networks:
+      - firecrawl_internal
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── 4. Job Persistence Database (Postgres with pg_cron) ────────────────
+  nuq-postgres:
+    image: ghcr.io/firecrawl/nuq-postgres:latest
+    container_name: firecrawl-postgres
+    restart: unless-stopped
+    # Necessary to configure pg_cron with the correct DB name before initialization
+    command: postgres -c cron.database_name=${POSTGRES_DB:-postgres}
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - firecrawl_internal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ── 5. Caching & Token Bucket Rate Limiter (Redis) ────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: firecrawl-redis
+    restart: unless-stopped
+    networks:
+      - firecrawl_internal
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--bind", "0.0.0.0"]
 
 volumes:
-  camofox-data:
+  rabbitmq_data:
+  postgres_data:
+  redis_data:
 
 networks:
   proxy_network:
     external: true
+  firecrawl_internal:
+    internal: true
