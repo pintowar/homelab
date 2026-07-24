@@ -49,6 +49,10 @@ http://webclaw.{$DOMAIN} {
     import webclaw:3080
 }
 
+http://camofox.{$DOMAIN} {
+    import camofox-browser:9377
+}
+
 http://n8n.{$DOMAIN} {
     import n8n:5678
 }

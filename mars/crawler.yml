@@ -7,12 +7,38 @@ services:
     command: webclaw-server
     environment:
       # Secures your local /v1/* endpoints. 
-      - WEBCLAW_API_KEY={WEBCLAW_API_KEY}
+      - WEBCLAW_API_KEY=${WEBCLAW_API_KEY}
       # Optional: Explicitly define host and port
       - WEBCLAW_PORT=3000
       - WEBCLAW_HOST=0.0.0.0
     networks:
       - proxy_network
+
+  camofox-browser:
+    image: ghcr.io/redf0x1/camofox-browser:latest
+    container_name: camofox-browser
+    restart: unless-stopped
+    environment:
+      - CAMOFOX_HOST=0.0.0.0
+      - CAMOFOX_PORT=9377
+      - CAMOFOX_AUTH_MODE=auto  # Options: auto, none, token. "auto" enforces CAMOFOX_API_KEY for external hosts.
+      - CAMOFOX_API_KEY=${CAMOFOX_API_KEY}
+      # - CAMOFOX_ADMIN_KEY=your_admin_key_here  # Optional
+      # - ENABLE_VNC=true                         # Enables the visual noVNC interface on port 6080
+      
+      # Optional: Route traffic through a residential proxy for better stealth
+      # - PROXY_HOST=your.proxy.com
+      # - PROXY_PORT=12345
+      # - PROXY_USER=username
+      # - PROXY_PASSWORD=password
+    volumes:
+      - camofox-data:/home/node/.camofox
+    shm_size: '2gb' # Recommended for heavy browser actions to prevent crashes
+    networks:
+      - proxy_network
+
+volumes:
+  camofox-data:
 
 networks:
   proxy_network:
