@@ -1,0 +1,23 @@
+name: 'security'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - ADMIN_TOKEN=${VAULTWARDEN_TOKEN}
+      - WEBSOCKET_ENABLED=true  # Enable WebSocket for live sync
+      - SIGNUPS_ALLOWED=false    # Change to false after you create your account
+      - DOMAIN=${VAULTWARDEN_DOMAIN}
+    volumes:
+      - ${VOLUMES_BASEDIR}/vaultwarden:/data/
+    networks:
+      - proxy_proxy-net
+
+networks:
+  proxy_proxy-net:
+    external: true

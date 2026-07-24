@@ -1,0 +1,20 @@
+name: 'ebook'
+
+services:
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/kavita/config:/config
+      - ${VOLUMES_ASSETS}/Books:/data
+    networks:
+      - proxy_proxy-net
+
+networks:
+  proxy_proxy-net:
+    external: true

@@ -26,6 +26,7 @@ services:
       - romm-db
     networks:
       - proxy_proxy-net
+      - romm_internal
 
   romm-db:
     image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
@@ -39,8 +40,10 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/romm/db:/var/lib/mysql
     networks:
-      - proxy_proxy-net
+      - romm_internal
 
 networks:
   proxy_proxy-net:
     external: true
+  romm_internal:
+    internal: true
