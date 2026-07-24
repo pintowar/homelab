@@ -15,7 +15,8 @@ services:
       - proxy_network
 
   camofox-browser:
-    image: ghcr.io/redf0x1/camofox-browser:latest
+    build:
+      context: https://github.com/redf0x1/camofox-browser.git#main
     container_name: camofox-browser
     restart: unless-stopped
     environment:
