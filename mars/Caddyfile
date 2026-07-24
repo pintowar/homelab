@@ -44,3 +44,11 @@ http://searxng.{$DOMAIN} {
 http://open-webui.{$DOMAIN} {   
     import proxy_to open-webui:8080
 }
+
+http://webclaw.{$DOMAIN} {
+    import webclaw:3080
+}
+
+http://n8n.{$DOMAIN} {
+    import n8n:5678
+}

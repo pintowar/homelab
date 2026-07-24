@@ -1,0 +1,19 @@
+name: 'crawler'
+
+services:
+  webclaw:
+    image: ghcr.io/0xmassi/webclaw:latest
+    container_name: webclaw-server
+    command: webclaw-server
+    environment:
+      # Secures your local /v1/* endpoints. 
+      - WEBCLAW_API_KEY={WEBCLAW_API_KEY}
+      # Optional: Explicitly define host and port
+      - WEBCLAW_PORT=3000
+      - WEBCLAW_HOST=0.0.0.0
+    networks:
+      - proxy_network
+
+networks:
+  proxy_network:
+    external: true
