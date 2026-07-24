@@ -30,6 +30,7 @@ services:
       disable: false
     networks:
       - proxy_proxy-net
+      - immich_internal
 
   immich-machine-learning:
     # For hardware acceleration, add one of -[armnn, cuda, rocm, openvino, rknn] to the image tag.
@@ -54,7 +55,7 @@ services:
     healthcheck:
       disable: false
     networks:
-      - proxy_proxy-net
+      - immich_internal
 
   immich-redis:
     image: docker.io/valkey/valkey:9
@@ -70,7 +71,7 @@ services:
     healthcheck:
       test: redis-cli ping || exit 1
     networks:
-      - proxy_proxy-net
+      - immich_internal
 
   immich-database:
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
@@ -95,8 +96,10 @@ services:
     healthcheck:
       disable: false
     networks:
-      - proxy_proxy-net
+      - immich_internal
 
 networks:
   proxy_proxy-net:
     external: true
+  immich_internal:
+    internal: true
