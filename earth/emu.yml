@@ -25,7 +25,7 @@ services:
     depends_on:
       - romm-db
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
       - romm_internal
 
   romm-db:
@@ -43,7 +43,7 @@ services:
       - romm_internal
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true
   romm_internal:
     internal: true

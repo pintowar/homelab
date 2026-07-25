@@ -13,8 +13,8 @@ services:
       - ${VOLUMES_BASEDIR}/kavita/config:/config
       - ${VOLUMES_ASSETS}/Books:/data
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true

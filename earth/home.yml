@@ -16,7 +16,7 @@ services:
       - ${VOLUMES_BASEDIR}/homepage:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
@@ -32,8 +32,8 @@ services:
       - PGID=${PGID}
     privileged: true
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true
