@@ -23,7 +23,14 @@ services:
       - ${VOLUMES_ASSETS}/Emu/library:/romm/library # Your game library
       - ${VOLUMES_ASSETS}/Emu/assets:/romm/assets # Uploaded saves, states, etc.
     depends_on:
-      - romm-db
+      romm-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - proxy_earth_network
       - romm_internal
@@ -39,6 +46,12 @@ services:
       - MARIADB_PASSWORD=${ROMM_DB_PASSWD}
     volumes:
       - ${VOLUMES_BASEDIR}/romm/db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - romm_internal
 

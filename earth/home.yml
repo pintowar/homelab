@@ -31,6 +31,12 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     privileged: true
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8123/", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - proxy_earth_network
 

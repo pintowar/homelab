@@ -13,6 +13,11 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/nginx-manager/data:/data
       - ${VOLUMES_BASEDIR}/letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD", "/usr/bin/check-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     networks:
       - earth_network
 

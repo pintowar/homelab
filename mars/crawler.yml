@@ -28,13 +28,13 @@ services:
       - MODEL_NAME=${MODEL_NAME:-}
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
       playwright-service:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy # Wait for RabbitMQ to be ready to avoid connection timeouts
       nuq-postgres:
-        condition: service_started
+        condition: service_healthy
     networks:
       - proxy_mars_network
       - firecrawl_internal
@@ -43,6 +43,12 @@ services:
         soft: 65535
         hard: 65535
     command: ["node", "dist/src/harness.js", "--start-docker"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3002 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # ── 2. Playwright Headless Browser Microservice ────────────────────────
   playwright-service:
@@ -56,6 +62,17 @@ services:
       - firecrawl_internal
     # Playwright containers require healthy shared memory sizing to prevent Chrome crashes
     shm_size: "1gb"
+    healthcheck:
+      test: [
+        "CMD", 
+        "node", 
+        "-e", 
+        "\"require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => { process.exit(1); })\""
+      ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ── 3. Task Orchestration Broker (RabbitMQ) ───────────────────────────
   rabbitmq:
@@ -88,6 +105,12 @@ services:
       - firecrawl_internal
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # ── 5. Caching & Token Bucket Rate Limiter (Redis) ────────────────────
   redis:
@@ -99,6 +122,11 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--bind", "0.0.0.0"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
 volumes:
   rabbitmq_data:
