@@ -30,7 +30,7 @@ services:
       redis:
         condition: service_healthy
       playwright-service:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy # Wait for RabbitMQ to be ready to avoid connection timeouts
       nuq-postgres:
@@ -43,6 +43,12 @@ services:
         soft: 65535
         hard: 65535
     command: ["node", "dist/src/harness.js", "--start-docker"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3002 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # ── 2. Playwright Headless Browser Microservice ────────────────────────
   playwright-service:
