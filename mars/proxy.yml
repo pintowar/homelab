@@ -21,5 +21,5 @@ volumes:
   caddy_config:
 
 networks:
-  network:
+  mars_network:
     driver: bridge

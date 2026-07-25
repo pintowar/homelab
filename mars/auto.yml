@@ -14,8 +14,8 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/n8n:/home/node/.n8n
     networks:
-      - proxy_network
+      - proxy_mars_network
 
 networks:
-  proxy_network:
+  proxy_mars_network:
     external: true

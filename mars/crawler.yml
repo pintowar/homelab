@@ -36,7 +36,7 @@ services:
       nuq-postgres:
         condition: service_started
     networks:
-      - proxy_network
+      - proxy_mars_network
       - firecrawl_internal
     ulimits:
       nofile:
@@ -106,7 +106,7 @@ volumes:
   redis_data:
 
 networks:
-  proxy_network:
+  proxy_mars_network:
     external: true
   firecrawl_internal:
     internal: true
