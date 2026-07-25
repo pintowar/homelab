@@ -16,8 +16,8 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/vaultwarden:/data/
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true

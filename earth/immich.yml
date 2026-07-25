@@ -29,7 +29,7 @@ services:
     healthcheck:
       disable: false
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
       - immich_internal
 
   immich-machine-learning:
@@ -99,7 +99,7 @@ services:
       - immich_internal
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true
   immich_internal:
     internal: true

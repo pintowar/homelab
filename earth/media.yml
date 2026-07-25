@@ -19,7 +19,7 @@ services:
       - WIREGUARD_MTU=1360
       - DNS_SERVER=on
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:9999 || exit 1"]
       interval: 30s
@@ -86,7 +86,7 @@ services:
       - ${VOLUMES_ASSETS}/Videos/sonarr:/tv
       - ${VOLUMES_BASEDIR}/bazarr/appdata/config:/config
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   radarr:
     image: ghcr.io/linuxserver/radarr:latest
@@ -104,7 +104,7 @@ services:
       - ${VOLUMES_ASSETS}/Videos/radarr/movies:/movies
       - ${VOLUMES_ASSETS}/Videos/radarr/anime:/anime
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
@@ -121,7 +121,7 @@ services:
       - ${VOLUMES_ASSETS}/Videos/sonarr/tv:/tv
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   jellyfin:
     image: linuxserver/jellyfin:latest
@@ -139,7 +139,7 @@ services:
     devices:
       - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
@@ -151,7 +151,7 @@ services:
     volumes:
       - ${VOLUMES_BASEDIR}/seerr/config:/app/config
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1
       start_period: 20s
@@ -160,5 +160,5 @@ services:
       retries: 3
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true

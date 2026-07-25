@@ -12,7 +12,7 @@ services:
       - TZ=${TIMEZONE}
       - GLANCES_OPT=-w
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
   netdata:
     image: netdata/netdata
@@ -38,7 +38,7 @@ services:
       - /var/log:/host/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - proxy_proxy-net
+      - proxy_earth_network
 
 volumes:
   netdataconfig:
@@ -46,5 +46,5 @@ volumes:
   netdatacache:
 
 networks:
-  proxy_proxy-net:
+  proxy_earth_network:
     external: true
