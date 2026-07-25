@@ -56,6 +56,17 @@ services:
       - firecrawl_internal
     # Playwright containers require healthy shared memory sizing to prevent Chrome crashes
     shm_size: "1gb"
+    healthcheck:
+      test: [
+        "CMD", 
+        "node", 
+        "-e", 
+        "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => { process.exit(1); })"
+      ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ── 3. Task Orchestration Broker (RabbitMQ) ───────────────────────────
   rabbitmq:
