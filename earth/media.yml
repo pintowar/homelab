@@ -44,6 +44,12 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSI http://localhost:8080/api/v2/app/webapiVersion || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:latest
@@ -59,6 +65,12 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "API_KEY=$$(grep '<ApiKey>' /config/config.xml | cut -d'>' -f2 | cut -d'<' -f1) && curl -fs http://localhost:9696/api/v1/health?apikey=$$API_KEY || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   byparr:
     image: ghcr.io/thephaseless/byparr:latest
@@ -87,13 +99,20 @@ services:
       - ${VOLUMES_BASEDIR}/bazarr/appdata/config:/config
     networks:
       - proxy_earth_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:6767/api/system/ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   radarr:
     image: ghcr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
     depends_on:
-      - qbittorrent
+      qbittorrent:
+        condition: service_healthy
     environment:
       - TZ=${TIMEZONE}
       - PUID=${PUID}
@@ -105,13 +124,20 @@ services:
       - ${VOLUMES_ASSETS}/Videos/radarr/anime:/anime
     networks:
       - proxy_earth_network
+    healthcheck:
+      test: ["CMD-SHELL", "API_KEY=$$(grep '<ApiKey>' /config/config.xml | cut -d'>' -f2 | cut -d'<' -f1) && curl -fsS http://localhost:7878/api/v3/health?apikey=$$API_KEY || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   sonarr:
     image: ghcr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
     depends_on:
-      - qbittorrent
+      qbittorrent:
+        condition: service_healthy
     environment:
       - TZ=${TIMEZONE}
       - PUID=${PUID}
@@ -122,6 +148,12 @@ services:
       - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
     networks:
       - proxy_earth_network
+    healthcheck:
+      test: ["CMD-SHELL", "API_KEY=$$(grep '<ApiKey>' /config/config.xml | cut -d'>' -f2 | cut -d'<' -f1) && curl -fsS http://localhost:8989/api/v3/health?apikey=$$API_KEY || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   jellyfin:
     image: linuxserver/jellyfin:latest
@@ -140,6 +172,12 @@ services:
       - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
       - proxy_earth_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8096/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
