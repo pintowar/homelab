@@ -1,0 +1,36 @@
+name: "notification"
+
+services:
+  apprise:
+    image: caronc/apprise:latest
+    container_name: apprise
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      APPRISE_STATEFUL_MODE: simple
+      APPRISE_WORKER_COUNT: "1"
+      APPRISE_ADMIN: "y"
+      TZ: ${TIMEZONE}
+    volumes:
+      - ${VOLUMES_BASEDIR}/apprise/config:/config
+      - ${VOLUMES_BASEDIR}/apprise/plugin:/plugin
+      - ${VOLUMES_BASEDIR}/apprise/attach:/attach
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/status || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    tmpfs:
+      - /tmp
+    networks:
+      - proxy_earth_network
+
+networks:
+  proxy_earth_network:
+    external: true
+    
