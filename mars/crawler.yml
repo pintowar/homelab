@@ -61,11 +61,11 @@ services:
     networks:
       - firecrawl_internal
     # Playwright containers require healthy shared memory sizing to prevent Chrome crashes
+    shm_size: "1gb"
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    mem_limit: "1gb"
     tmpfs:
       - /tmp/.cache:noexec,nosuid,size=1g
     healthcheck:
