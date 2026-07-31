@@ -36,7 +36,7 @@ services:
       - firecrawl_internal
 
   lightpanda:
-    image: docker.io/lightpanda/lightpanda:latest
+    image: docker.io/lightpanda/browser:latest
     container_name: lightpanda-browser
     # CRITICAL: This restart policy is load-bearing. LightPanda can crash/OOM 
     # on heavy/adversarial pages. If it fails, auto-restart prevents 
