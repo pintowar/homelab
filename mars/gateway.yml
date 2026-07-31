@@ -17,7 +17,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - proxy_earth_network
+      - proxy_mars_network
       - gateway_internal
 
   redis:
@@ -40,7 +40,7 @@ volumes:
     name: redis-prod-data
 
 networks:
-  proxy_earth_network:
+  proxy_mars_network:
     external: true
   gateway_internal:
     internal: true
