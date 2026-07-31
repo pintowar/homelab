@@ -45,8 +45,8 @@ http://open-webui.{$DOMAIN} {
     import proxy_to open-webui:8080
 }
 
-http://firecrawl.{$DOMAIN} {
-    import proxy_to firecrawl-api:3002
+http://fastcrw.{$DOMAIN} {
+    import proxy_to fastcrw:3000
 }
 
 http://n8n.{$DOMAIN} {

@@ -1,19 +1,20 @@
 name: 'crawler'
 
 services:
-  firecrawl-api:
+  fastcrw:
     image: ghcr.io/us/crw:latest
-    container_name: firecrawl-api #fastcrw-server
+    container_name: fastcrw
     restart: unless-stopped
     environment:
       # Run the server on port 3000 inside the container
-      - CRW_SERVER__PORT=3002
+      - CRW_SERVER__PORT=3000
       # Select the renderer mode: 
       # "auto" (HTTP first, auto-detect SPAs, fall back to CDP) 
       # or "lightpanda" (force Lightpanda for all JS execution)
       - CRW_RENDERER__MODE=auto
       # Points the fastCRW engine to the Lightpanda CDP endpoint over the local Docker network
       - CRW_RENDERER__LIGHTPANDA__WS_URL=ws://lightpanda:9222
+      - CRW_SEARCH__SEARXNG_URL=http://searxng:8080
       # (Optional) Restrict API access to authorized keys. Leave empty to allow unauthenticated access.
       # - CRW_AUTH__API_KEYS=["your-custom-api-key"]      
       # (Optional) Configure an LLM API key for structured schemas /v1/extract
@@ -33,7 +34,7 @@ services:
     pids_limit: 512               # Thwarts fork-bomb/runaway worker exhaustion
     networks:
       - proxy_mars_network
-      - firecrawl_internal
+      - fastcrw_internal
 
   lightpanda:
     image: docker.io/lightpanda/browser:latest
@@ -47,148 +48,10 @@ services:
       - LIGHTPANDA_DISABLE_TELEMETRY=true # Disables third-party usage data collection
     mem_limit: 1g
     networks:
-      - firecrawl_internal
-
-#   # ── 1. Firecrawl Core API Server & Subprocesses ────────────────────
-#   firecrawl-api:
-#     image: ghcr.io/firecrawl/firecrawl:latest
-#     container_name: firecrawl-api
-#     restart: unless-stopped
-#     environment:
-#       - HOST=0.0.0.0
-#       - PORT=3002
-#       - ENV=local
-#       - USE_DB_AUTHENTICATION=${USE_DB_AUTHENTICATION:-false}
-#       - BULL_AUTH_KEY=${BULL_AUTH_KEY:-localdev}
-#       # Redis Connection (Job queuing & rate limiting)
-#       - REDIS_URL=redis://redis:6379
-#       - REDIS_RATE_LIMIT_URL=redis://redis:6379
-#       # NuQ Queue Connections
-#       - NUQ_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-#       - NUQ_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@nuq-postgres:5432/${POSTGRES_DB:-postgres}
-#       # Headless Rendering Microservice Connection
-#       - PLAYWRIGHT_MICROSERVICE_URL=http://playwright-service:3000/scrape
-#       - BROWSER_SERVICE_URL=http://playwright-service:3000
-#       # AI features (Optional)
-#       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-#       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
-#       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-}
-#       - MODEL_NAME=${MODEL_NAME:-}
-#     depends_on:
-#       redis:
-#         condition: service_healthy
-#       playwright-service:
-#         condition: service_healthy
-#       rabbitmq:
-#         condition: service_healthy # Wait for RabbitMQ to be ready to avoid connection timeouts
-#       nuq-postgres:
-#         condition: service_healthy
-#     networks:
-#       - proxy_mars_network
-#       - firecrawl_internal
-#     ulimits:
-#       nofile:
-#         soft: 65535
-#         hard: 65535
-#     command: ["node", "dist/src/harness.js", "--start-docker"]
-#     healthcheck:
-#       test: ["CMD-SHELL", "curl -f http://localhost:3002 || exit 1"]
-#       interval: 30s
-#       timeout: 10s
-#       retries: 3
-#       start_period: 30s
-
-#   # ── 2. Playwright Headless Browser Microservice ────────────────────────
-#   playwright-service:
-#     image: ghcr.io/firecrawl/playwright-service:latest
-#     container_name: firecrawl-playwright
-#     restart: unless-stopped
-#     environment:
-#       - PORT=3000
-#       - MAX_CONCURRENT_PAGES=10
-#     networks:
-#       - firecrawl_internal
-#     # Playwright containers require healthy shared memory sizing to prevent Chrome crashes
-#     shm_size: "1gb"
-#     security_opt:
-#       - no-new-privileges:true
-#     cap_drop:
-#       - ALL
-#     tmpfs:
-#       - /tmp/.cache:noexec,nosuid,size=1g
-#     healthcheck:
-#       test: [
-#         "CMD", 
-#         "node", 
-#         "-e", 
-#         "\"require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => { process.exit(1); })\""
-#       ]
-#       interval: 30s
-#       timeout: 10s
-#       retries: 3
-#       start_period: 15s
-
-#   # ── 3. Task Orchestration Broker (RabbitMQ) ───────────────────────────
-#   rabbitmq:
-#     image: docker.io/rabbitmq:3-management-alpine
-#     container_name: firecrawl-rabbitmq
-#     restart: unless-stopped
-#     networks:
-#       - firecrawl_internal
-#     volumes:
-#       - rabbitmq_data:/var/lib/rabbitmq
-#     healthcheck:
-#       test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 10
-
-#   # ── 4. Job Persistence Database (Postgres with pg_cron) ────────────────
-#   nuq-postgres:
-#     image: ghcr.io/firecrawl/nuq-postgres:latest
-#     container_name: firecrawl-postgres
-#     restart: unless-stopped
-#     # Necessary to configure pg_cron with the correct DB name before initialization
-#     command: postgres -c cron.database_name=${POSTGRES_DB:-postgres}
-#     environment:
-#       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-#       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-#       - POSTGRES_DB=${POSTGRES_DB:-postgres}
-#       - PGDATA=/var/lib/postgresql/data/pgdata
-#     networks:
-#       - firecrawl_internal
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-#       interval: 10s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 10s
-
-#   # ── 5. Caching & Token Bucket Rate Limiter (Redis) ────────────────────
-#   redis:
-#     image: docker.io/redis:7-alpine
-#     container_name: firecrawl-redis
-#     restart: unless-stopped
-#     networks:
-#       - firecrawl_internal
-#     volumes:
-#       - redis_data:/data
-#     command: ["redis-server", "--bind", "0.0.0.0"]
-#     healthcheck:
-#       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 3
-
-# volumes:
-#   rabbitmq_data:
-#   postgres_data:
-#   redis_data:
+      - fastcrw_internal
 
 networks:
   proxy_mars_network:
     external: true
-  firecrawl_internal:
+  fastcrw_internal:
     internal: true
