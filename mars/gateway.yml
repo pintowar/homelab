@@ -2,7 +2,7 @@ name: "gateway"
 
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: docker.io/diegosouzapw/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     user: ${PUID}:${PGID}
@@ -21,7 +21,7 @@ services:
       - gateway_internal
 
   redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     container_name: omniroute-redis
     restart: unless-stopped
     volumes:
