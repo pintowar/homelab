@@ -5,7 +5,7 @@ services:
     image: docker.io/diegosouzapw/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
-    user: ${PUID}:${PGID}
+    # user: ${PUID}:${PGID}
     volumes:
       - ${VOLUMES_BASEDIR}/omniroute:/app/data
     environment:
