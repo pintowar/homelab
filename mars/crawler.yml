@@ -43,7 +43,6 @@ services:
     # on heavy/adversarial pages. If it fails, auto-restart prevents 
     # fastCRW from falling back to plain HTTP permanently.
     restart: unless-stopped
-    # command: ["serve", "--host", "0.0.0.0", "--port", "9222"]
     environment:
       - LIGHTPANDA_DISABLE_TELEMETRY=true # Disables third-party usage data collection
     mem_limit: 1g

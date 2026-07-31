@@ -1,0 +1,46 @@
+name: "gateway"
+
+services:
+  omniroute:
+    image: diegosouzapw/omniroute:latest
+    container_name: omniroute
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/omniroute:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=20128
+      - REDIS_URL=redis://redis:6379 # Conecta ao contêiner do Redis abaixo
+      - FIRECRAWL_BASE_URL=${FIRECRAWL_BASE_URL}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - proxy_earth_network
+      - gateway_internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: omniroute-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - gateway_internal
+
+volumes:
+  redis-data:
+    name: redis-prod-data
+
+networks:
+  proxy_earth_network:
+    external: true
+  gateway_internal:
+    internal: true
