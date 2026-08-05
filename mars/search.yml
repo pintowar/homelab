@@ -7,10 +7,11 @@ services:
     restart: unless-stopped
     user: ${PUID}:${PGID}
     depends_on:
-      searxng-redis:
+      searxng-valkey:
         condition: service_healthy
     volumes:
       - ${VOLUMES_BASEDIR}/searxng:/etc/searxng:rw
+      - searxng-core-data:/var/cache/searxng/
     environment:
       - FORCE_OWNERSHIP=false
       - SEARXNG_SECRET=${SEARXNG_SECRET}
@@ -34,13 +35,13 @@ services:
       retries: 3
       start_period: 15s
 
-  searxng-redis:
+  searxng-valkey:
     image: docker.io/valkey/valkey:9-alpine
-    container_name: searxng-redis
+    container_name: searxng-valkey
     restart: unless-stopped
     command: valkey-server --save 30 1 --loglevel warning
     volumes:
-      - searxng-redis-data:/data
+      - searxng-valkey-data:/data
     networks:
       - searxng_internal
     healthcheck:
@@ -65,7 +66,8 @@ services:
   #     - searxng_internal
 
 volumes:
-  searxng-redis-data:
+  searxng-core-data:
+  searxng-valkey-data:
 
 networks:
   proxy_mars_network:
