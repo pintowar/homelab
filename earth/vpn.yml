@@ -1,0 +1,116 @@
+name: 'vpn'
+
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PK} # <--- Paste key from Step 1
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES} # <--- Required for NordVPN
+      - SERVER_COUNTRIES=${TUN_COUNTRIES} # Optional: Pick your country
+      - TZ=${TIMEZONE}
+      - WIREGUARD_MTU=1360
+      - DNS_SERVER=on
+      - HTTP_CONTROL_SERVER_ADDRESS=:8000
+      - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE='{"auth":"none"}'
+      - HTTPPROXY=on
+    networks:
+      - proxy_earth_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9999 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  gluetun-webui:
+    image: scuzza/gluetun-webui:latest
+    container_name: gluetun-webui
+    restart: unless-stopped
+    environment:
+      - GLUETUN_CONTROL_URL=http://gluetun:8000
+      # Uncomment if Gluetun auth is enabled:
+      #- GLUETUN_API_KEY=yourtoken
+      #- GLUETUN_USER=username
+      #- GLUETUN_PASSWORD=password
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - proxy_earth_network
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - WEBUI_PORT=8080
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/qbittorrent/config:/config
+      - ${VOLUMES_ASSETS}/Downloads/torrents:/downloads
+    # CRITICAL: Route network through Gluetun
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSI http://localhost:8080/api/v2/app/webapiVersion || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VOLUMES_BASEDIR}/prowlarr/config:/config
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "API_KEY=$$(grep '<ApiKey>' /config/config.xml | cut -d'>' -f2 | cut -d'<' -f1) && curl -fs http://localhost:9696/api/v1/health?apikey=$$API_KEY || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE}
+      - PORT=8191
+      - LOG_LEVEL=info
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+        restart: true
+
+networks:
+  proxy_earth_network:
+    external: true
