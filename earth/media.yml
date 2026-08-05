@@ -26,9 +26,6 @@ services:
     image: ghcr.io/linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
-    depends_on:
-      qbittorrent:
-        condition: service_healthy
     environment:
       - TZ=${TIMEZONE}
       - PUID=${PUID}
@@ -51,9 +48,6 @@ services:
     image: ghcr.io/linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
-    depends_on:
-      qbittorrent:
-        condition: service_healthy
     environment:
       - TZ=${TIMEZONE}
       - PUID=${PUID}
