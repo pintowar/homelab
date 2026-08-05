@@ -30,25 +30,25 @@ services:
       retries: 5
       start_period: 10s
 
-  # gluetun-webui:
-  #   image: scuzza/gluetun-webui:latest
-  #   container_name: gluetun-webui
-  #   restart: unless-stopped
-  #   environment:
-  #     - GLUETUN_CONTROL_URL=http://gluetun:8000
-  #     # Uncomment if Gluetun auth is enabled:
-  #     #- GLUETUN_API_KEY=yourtoken
-  #     #- GLUETUN_USER=username
-  #     #- GLUETUN_PASSWORD=password
-  #   read_only: true
-  #   tmpfs:
-  #     - /tmp
-  #   security_opt:
-  #     - no-new-privileges:true
-  #   cap_drop:
-  #     - ALL
-  #   networks:
-  #     - proxy_earth_network
+  gluetun-webui:
+    image: scuzza/gluetun-webui:latest
+    container_name: gluetun-webui
+    restart: unless-stopped
+    environment:
+      - GLUETUN_CONTROL_URL=http://gluetun:8000
+      # Uncomment if Gluetun auth is enabled:
+      #- GLUETUN_API_KEY=yourtoken
+      #- GLUETUN_USER=username
+      #- GLUETUN_PASSWORD=password
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - proxy_earth_network
 
   # qbittorrent:
   #   image: linuxserver/qbittorrent:latest
