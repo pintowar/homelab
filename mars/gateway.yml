@@ -17,7 +17,7 @@ services:
         condition: service_healthy
     networks:
       - proxy_mars_network
-      - gateway_internal
+      - omniroute_internal
 
   redis:
     image: docker.io/library/redis:7-alpine
@@ -32,7 +32,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - gateway_internal
+      - omniroute_internal
 
 volumes:
   omniroute-data:
@@ -43,5 +43,5 @@ volumes:
 networks:
   proxy_mars_network:
     external: true
-  gateway_internal:
+  omniroute_internal:
     internal: true
