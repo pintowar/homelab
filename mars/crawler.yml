@@ -16,7 +16,7 @@ services:
       - CRW_RENDERER__LIGHTPANDA__WS_URL=ws://lightpanda:9222
       - CRW_SEARCH__SEARXNG_URL=http://searxng:8080
       # (Optional) Restrict API access to authorized keys. Leave empty to allow unauthenticated access.
-      # - CRW_AUTH__API_KEYS=["your-custom-api-key"]      
+      - CRW_AUTH__API_KEYS=${CRW_AUTH__API_KEYS} # ["your-custom-api-key"]
       # (Optional) Configure an LLM API key for structured schemas /v1/extract
       # - CRW_EXTRACTION__LLM__API_KEY=sk-proj-...
     depends_on:
