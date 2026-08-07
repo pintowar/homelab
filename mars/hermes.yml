@@ -5,6 +5,7 @@ services:
     image: docker.io/nousresearch/hermes-agent:v2026.7.20
     container_name: hermes-agent
     restart: unless-stopped
+    user: "${PUID}:${PGID}"
     command: gateway run
     # ports:
     #   - "8642:8642" # Gateway API (restricted to localhost for security)
@@ -46,6 +47,7 @@ services:
     image: ghcr.io/nesquena/hermes-webui:latest
     container_name: hermes-webui
     restart: unless-stopped
+    user: "${PUID}:${PGID}"
     # ports:
     #   - "8787:8787" # Gateway API (restricted to localhost for security)
     volumes:
