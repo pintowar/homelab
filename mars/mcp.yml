@@ -1,0 +1,81 @@
+name: 'mcp'
+
+services:
+  mcphub:
+    image: docker.io/samanhappy/mcphub:latest
+    container_name: mcphub
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/mcphub/config/mcp_settings.json:/app/mcp_settings.json
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      PORT: 3000
+      INIT_TIMEOUT: 300000
+      SMART_ROUTING_ENABLED: true
+      SMART_ROUTING_EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER}
+      OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL}
+      EMBEDDING_MAX_TOKENS: 256
+      DB_URL: postgresql://mcphub:mcphub_password@pgvector:5432/mcphub
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    networks:
+      - proxy_mars_network
+      - hub_internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://mcphub:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  pgvector:
+    image: docker.io/pgvector/pgvector:pg17
+    container_name: pgvector
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    environment:
+      POSTGRES_DB: mcphub
+      POSTGRES_USER: mcphub
+      POSTGRES_PASSWORD: mcphub_password
+    volumes:
+      - ${VOLUMES_BASEDIR}/mcphub/data:/var/lib/postgresql/data
+    shm_size: 128mb
+    networks:
+      - hub_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mcp-dockhand:
+    image: ghcr.io/strausmann/mcp-dockhand:latest
+    container_name: mcp-dockhand
+    restart: unless-stopped
+    environment:
+      - DOCKHAND_URL=${DOCKHAND_URL}
+      - DOCKHAND_USERNAME=${DOCKHAND_USERNAME}
+      - DOCKHAND_PASSWORD=${DOCKHAND_PASSWORD}
+      - LOG_LEVEL=debug
+    networks:
+      - hub_internal
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://mcp-dockhand:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s  
+
+networks:
+  proxy_mars_network:
+    external: true
+  hub_internal:
+    internal: true
