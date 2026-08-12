@@ -53,6 +53,10 @@ http://omniroute.{$DOMAIN} {
     import proxy_to omniroute:20128
 }
 
+http://mcphub.{$DOMAIN} {
+    import proxy_to mcphub:3000
+}
+
 http://n8n.{$DOMAIN} {
     import proxy_to n8n:5678
 }
