@@ -21,22 +21,22 @@ services:
     networks:
       - proxy_mars_network
       
-  mcpo:
-    image: ghcr.io/open-webui/mcpo:main
-    container_name: mcpo-server
-    restart: unless-stopped
-    volumes:
-      - ${VOLUMES_BASEDIR}/mcps/config.json:/app/config.json
-      # - ${VOLUMES_BASEDIR}/mcps:/app
-    command: --config /app/config.json
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/openapi.json || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    networks:
-      - proxy_mars_network
+  # mcpo:
+  #   image: ghcr.io/open-webui/mcpo:main
+  #   container_name: mcpo-server
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ${VOLUMES_BASEDIR}/mcps/config.json:/app/config.json
+  #     # - ${VOLUMES_BASEDIR}/mcps:/app
+  #   command: --config /app/config.json
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -fsS http://localhost:8000/openapi.json || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 15s
+  #   networks:
+  #     - proxy_mars_network
 
   # vane:
   #   image: itzcrazykns1337/vane:latest
