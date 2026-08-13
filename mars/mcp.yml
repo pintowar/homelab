@@ -35,11 +35,7 @@ services:
     image: docker.io/pgvector/pgvector:pg17
     container_name: pgvector
     restart: unless-stopped
-    user: ${PUID}:${PGID}
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - NET_RAW
+    userns_mode: 'keep-id:uid=10000,gid=10000'
     environment:
       POSTGRES_DB: mcphub
       POSTGRES_USER: mcphub
