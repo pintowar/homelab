@@ -52,6 +52,21 @@ services:
       retries: 5
       start_period: 10s
 
+  llama-cpp-minilm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: llama-cpp-minilm
+    restart: unless-stopped
+    volumes:
+      - ${VOLUMES_BASEDIR}/llamacpp/models:/models
+    command:
+      - "-m"
+      - "/models/all-MiniLM-L6-v2-Q8_0.gguf"
+      - "--embedding"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "9931"
+
   mcp-dockhand:
     image: ghcr.io/strausmann/mcp-dockhand:latest
     container_name: mcp-dockhand
@@ -68,7 +83,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s  
+      start_period: 15s
 
 networks:
   proxy_mars_network:
