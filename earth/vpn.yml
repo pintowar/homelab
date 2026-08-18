@@ -97,19 +97,36 @@ services:
       retries: 3
       start_period: 30s
 
-  byparr:
-    image: ghcr.io/thephaseless/byparr:latest
-    container_name: byparr
+  # byparr:
+  #   image: ghcr.io/thephaseless/byparr:latest
+  #   container_name: byparr
+  #   restart: unless-stopped
+  #   environment:
+  #     - TZ=${TIMEZONE}
+  #     - PORT=8191
+  #     - LOG_LEVEL=info
+  #   network_mode: "service:gluetun"
+  #   depends_on:
+  #     gluetun:
+  #       condition: service_healthy
+  #       restart: true
+
+  trawl:
+    image: ghcr.io/germondai/trawl:latest
+    container_name: trawl
     restart: unless-stopped
-    environment:
-      - TZ=${TIMEZONE}
-      - PORT=8191
-      - LOG_LEVEL=info
+    # ports:
+    #   - "8191:8191"
     network_mode: "service:gluetun"
     depends_on:
       gluetun:
         condition: service_healthy
         restart: true
+    volumes:
+      - trawl_data:/data
+
+volumes:
+  trawl_data:
 
 networks:
   proxy_earth_network:
