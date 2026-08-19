@@ -79,7 +79,7 @@ services:
       - DOCKHAND_PASSWORD=${DOCKHAND_PASSWORD}
       - LOG_LEVEL=debug
     networks:
-      - hub_internal
+      - proxy_mars_network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://mcp-dockhand:8080/health"]
       interval: 30s
