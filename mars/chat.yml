@@ -9,6 +9,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - WEBUI_AUTH=False
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
     volumes:
       - ${VOLUMES_BASEDIR}/open_webui/data:/app/backend/data
       - ${VOLUMES_BASEDIR}/open_webui/cache:/root/.cache
