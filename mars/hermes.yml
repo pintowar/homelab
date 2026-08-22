@@ -55,8 +55,8 @@ services:
       - hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
       - ${VOLUMES_BASEDIR}/hermes/workspace:/workspace # Mounts the local host directory for easy file access
     environment:
-      # - WANTED_UID=${PUID}
-      # - WANTED_GID=${PGID}
+      - WANTED_UID=${PUID}
+      - WANTED_GID=${PGID}
 
       - HERMES_WEBUI_HOST=0.0.0.0
       - HERMES_WEBUI_PORT=8787
