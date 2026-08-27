@@ -79,7 +79,7 @@ services:
 
   camofox-api:
     image: ghcr.io/jo-inc/camofox-browser:latest
-    container_name: camoufox-api
+    container_name: camofox-api
     restart: unless-stopped
     # ports:
     #   - "9377:9377" # CamoFox HTTP REST API
