@@ -57,6 +57,10 @@ http://mcphub.{$DOMAIN} {
     import proxy_to mcphub:3000
 }
 
+http://camofox.{$DOMAIN} {
+    import proxy_to camofox-api:9377
+}
+
 http://n8n.{$DOMAIN} {
     import proxy_to n8n:5678
 }
