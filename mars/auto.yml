@@ -5,13 +5,13 @@ services:
     image: docker.io/n8nio/n8n:latest
     container_name: n8n
     restart: unless-stopped
+    userns_mode: keep-id
     user: "0:0"
     environment:
-#      - PUID=${PUID}
-#      - PGID=${PGID}
-      - N8N_RUNNERS_ENABLED=true
+      - N8N_USER_FOLDER=/home/node
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      - N8N_UNVERIFIED_PACKAGES_ENABLED=true
       - N8N_RESTRICT_FILE_ACCESS_TO=/files
     volumes:
       - ${VOLUMES_BASEDIR}/n8n/config:/home/node/.n8n:Z
