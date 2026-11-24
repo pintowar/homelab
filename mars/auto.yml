@@ -14,8 +14,8 @@ services:
       - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
       - N8N_RESTRICT_FILE_ACCESS_TO=/files
     volumes:
-      - ${VOLUMES_BASEDIR}/n8n/config:/home/node/.n8n
-      - ${VOLUMES_BASEDIR}/n8n/files:/files
+      - ${VOLUMES_BASEDIR}/n8n/config:/home/node/.n8n:Z
+      - ${VOLUMES_BASEDIR}/n8n/files:/files:Z
     networks:
       - proxy_mars_network
 
