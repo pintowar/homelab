@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     volumes:
       - ${VOLUMES_BASEDIR}/mcphub/config/mcp_settings.json:/app/mcp_settings.json
+      - ${VOLUMES_BASEDIR}/mcphub/mcp_config:/config
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       PORT: 3000
